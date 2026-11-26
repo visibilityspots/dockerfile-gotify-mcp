@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    tags:
+      - '*'
+  # test only: the shared workflow skips deploy on pull requests
+  pull_request:
+    branches: [main]
+
+# new repos get a read-only GITHUB_TOKEN; the release and CHANGELOG commit need write
+permissions:
+  contents: write
+
+jobs:
+  main:
+    uses: visibilityspots/github-workflows/.github/workflows/main.yml@main
+    with:
+      # 64-bit only: the Dockerfile installs binary wheels only, verified on these two
+      platforms: 'linux/amd64,linux/arm64'
+      # no Gotify behind it: goss tests the MCP transport and the path guard only
+      run_args: '-e MCP_ALLOWED_HOSTS=gotify-mcp.example.com -e GOTIFY_URL=http://127.0.0.1:1 -e GOTIFY_CLIENT_TOKEN=test'
+    secrets:
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

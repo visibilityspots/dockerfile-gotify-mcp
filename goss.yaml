@@ -1,0 +1,50 @@
+process:
+  python3:
+    running: true
+
+user:
+  gotify-mcp:
+    exists: true
+    uid: 10001
+
+file:
+  /opt/gotify-mcp/server.py:
+    exists: true
+
+command:
+  id -u:
+    exit-status: 0
+    stdout:
+      - "10001"
+  # the guard refuses every path outside its allowlist, before any request
+  python3 -I -c "import sys; sys.path.insert(0, '/opt/gotify-mcp'); import server; server._get('/client')":
+    timeout: 60000
+    exit-status: 1
+    stderr:
+      - "path not allowed: /client"
+
+port:
+  tcp:8080:
+    listening: true
+
+http:
+  # a real Host header, as behind a reverse proxy: must not get 421
+  http://127.0.0.1:8080/mcp:
+    status: 200
+    method: POST
+    request-headers:
+      - "Host: gotify-mcp.example.com"
+      - "Content-Type: application/json"
+      - "Accept: application/json, text/event-stream"
+    request-body: '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"goss","version":"1"}}}'
+    body:
+      - '"name":"gotify"'
+  # a Host that is not allowed: DNS rebinding protection answers 421
+  http://localhost:8080/mcp:
+    status: 421
+    method: POST
+    request-headers:
+      - "Host: other.example.net"
+      - "Content-Type: application/json"
+      - "Accept: application/json, text/event-stream"
+    request-body: '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"goss","version":"1"}}}'

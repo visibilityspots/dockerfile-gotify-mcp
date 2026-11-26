@@ -1,0 +1,2 @@
+# mcp 2.x renamed FastMCP to MCPServer; stay on 1.x until server.py migrates.
+mcp==1.30.0
