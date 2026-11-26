@@ -28,12 +28,13 @@ port:
     listening: true
 
 http:
-  # a real Host header, as behind a reverse proxy: must not get 421
+  # a real Host header, as behind a reverse proxy, with the test token: 200
   http://127.0.0.1:8080/mcp:
     status: 200
     method: POST
     request-headers:
       - "Host: gotify-mcp.example.com"
+      - "Authorization: Bearer test-token"
       - "Content-Type: application/json"
       - "Accept: application/json, text/event-stream"
     request-body: '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"goss","version":"1"}}}'
@@ -45,6 +46,19 @@ http:
     method: POST
     request-headers:
       - "Host: other.example.net"
+      - "Authorization: Bearer test-token"
       - "Content-Type: application/json"
       - "Accept: application/json, text/event-stream"
     request-body: '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"goss","version":"1"}}}'
+  # no token: 401 with a WWW-Authenticate challenge (127.0.0.2 = third URL key)
+  http://127.0.0.2:8080/mcp:
+    status: 401
+    method: POST
+    request-headers:
+      - "Host: gotify-mcp.example.com"
+      - "Content-Type: application/json"
+    request-body: '{"jsonrpc":"2.0","id":1,"method":"initialize"}'
+    headers:
+      - 'Www-Authenticate: Bearer realm="gotify-mcp", error="invalid_token"'
+    body:
+      - '{"error":"invalid_token"}'

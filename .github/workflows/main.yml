@@ -18,7 +18,8 @@ jobs:
     with:
       # 64-bit only: the Dockerfile installs binary wheels only, verified on these two
       platforms: 'linux/amd64,linux/arm64'
-      # no Gotify behind it: goss tests the MCP transport and the path guard only
-      run_args: '-e MCP_ALLOWED_HOSTS=gotify-mcp.example.com -e GOTIFY_URL=http://127.0.0.1:1 -e GOTIFY_CLIENT_TOKEN=test'
+      # no Gotify behind it: goss tests the MCP transport, auth and the path guard only.
+      # The hash is sha256("test-token"), the token goss sends.
+      run_args: '-e MCP_TOKEN_SHA256=goss=4c5dc9b7708905f77f5e5d16316b5dfb425e68cb326dcd55a860e90a7707031e -e MCP_ALLOWED_HOSTS=gotify-mcp.example.com -e GOTIFY_URL=http://127.0.0.1:1 -e GOTIFY_CLIENT_TOKEN=test'
     secrets:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
