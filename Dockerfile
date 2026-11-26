@@ -1,4 +1,4 @@
-FROM python:3.13.18-alpine3.24
+FROM python:3.15.2-alpine3.24
 # apk upgrade: the python image lags behind the alpine package repo.
 # pip goes after the install, with the CVEs in its vendored packages.
 COPY requirements.txt /tmp/requirements.txt
